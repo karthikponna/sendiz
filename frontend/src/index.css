@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/instrument-sans";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Theme: cloudflare-hero-design skill (dark only). */
+@theme inline {
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --color-cf-bg: var(--cf-bg);
+  --color-cf-bg-raised: var(--cf-bg-raised);
+  --color-cf-fg: var(--cf-fg);
+  --color-cf-fg-strong: var(--cf-fg-strong);
+  --color-cf-fg-muted: var(--cf-fg-muted);
+  --color-cf-border: var(--cf-border);
+  --color-cf-accent: var(--cf-accent);
+  --color-cf-cream: var(--cf-cream);
+  --color-cf-ink: var(--cf-ink);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --cf-bg: #151414;
+  --cf-bg-raised: #191817;
+  --cf-fg: #f0e3de;
+  --cf-fg-strong: #fffbf5;
+  --cf-fg-muted: rgb(240 227 222 / 0.7);
+  --cf-border: rgb(240 227 222 / 0.125);
+  --cf-accent: #ff5e1f;
+  --cf-cream: #fffbf5;
+  --cf-ink: #1f1f1f;
+
+  --background: var(--cf-bg);
+  --foreground: var(--cf-fg);
+  --card: var(--cf-bg-raised);
+  --card-foreground: var(--cf-fg);
+  --popover: #1c1b1a;
+  --popover-foreground: var(--cf-fg);
+  --primary: var(--cf-accent);
+  --primary-foreground: var(--cf-fg-strong);
+  --secondary: #221f1e;
+  --secondary-foreground: var(--cf-fg);
+  --muted: #1f1d1c;
+  --muted-foreground: rgb(240 227 222 / 0.6);
+  --accent: rgb(240 227 222 / 0.07);
+  --accent-foreground: var(--cf-fg-strong);
+  --destructive: #ff5b66;
+  --border: var(--cf-border);
+  --input: rgb(240 227 222 / 0.16);
+  --ring: var(--cf-accent);
+  --chart-1: #ff5e1f;
+  --chart-2: #ffb38a;
+  --chart-3: #f0e3de;
+  --chart-4: #8a7f7a;
+  --chart-5: #4a4441;
+  --radius: 0.75rem;
+  --sidebar: var(--cf-bg);
+  --sidebar-foreground: var(--cf-fg);
+  --sidebar-primary: var(--cf-accent);
+  --sidebar-primary-foreground: var(--cf-fg-strong);
+  --sidebar-accent: rgb(240 227 222 / 0.07);
+  --sidebar-accent-foreground: var(--cf-fg-strong);
+  --sidebar-border: var(--cf-border);
+  --sidebar-ring: var(--cf-accent);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  /* 1px dashed vertical rail: 16px dash, 16px gap */
+  .cf-rail {
+    width: 1px;
+    background-image: linear-gradient(to bottom, var(--cf-border) 50%, transparent 50%);
+    background-size: 1px 32px;
+    background-repeat: repeat-y;
+  }
+
+  /* 1px dashed horizontal line with the same 16px rhythm as .cf-rail */
+  .cf-rail-x {
+    height: 1px;
+    background-image: linear-gradient(to right, var(--cf-border) 50%, transparent 50%);
+    background-size: 32px 1px;
+    background-repeat: repeat-x;
+  }
+
+  /* Dot grid in the gutters next to content (cloudflare.com: 0.75px dots every 12px) */
+  .cf-grid-dots {
+    background-image: radial-gradient(circle, rgb(240 227 222 / 0.22) 1px, transparent 1.25px);
+    background-size: 12px 12px;
+  }
+
+  .cf-dots {
+    background-image: radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+
+  .cf-glow {
+    background: radial-gradient(60% 50% at 50% 108%, #fff6d6 0%, #ffd27a 28%, rgb(255 94 31 / 0) 72%);
+  }
+
+  /* Glass controls: resend-auth-design skill, tinted for the warm theme. */
+  .glass {
+    border: 2px solid rgb(240 227 222 / 0.06);
+    background-image: linear-gradient(104deg, rgb(255 251 245 / 0.05) 5%, rgb(240 227 222 / 0.1) 100%);
+    background-origin: border-box;
+    backdrop-filter: blur(25px);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+}
