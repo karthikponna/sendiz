@@ -22,7 +22,17 @@ export function FooterBar() {
         />
       </div>
       <div className="relative mx-auto flex max-w-[1200px] items-center justify-between px-6 py-8 text-sm text-cf-fg-muted">
-        <span>© {new Date().getFullYear()} Sendiz</span>
+        <span>
+          © {new Date().getFullYear()} Sendiz by{' '}
+          <a
+            href="https://x.com/karthikponna19"
+            target="_blank"
+            rel="noreferrer"
+            className="text-cf-fg transition-colors hover:text-cf-fg-strong"
+          >
+            karthikponna19
+          </a>
+        </span>
         <span>Email for developers</span>
       </div>
     </footer>
