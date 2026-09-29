@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router'
-import { ChevronsUpDown, ExternalLink, KeyRound, LogOut, Mail, Rocket } from 'lucide-react'
+import { ChevronsUpDown, ExternalLink, Gauge, KeyRound, LogOut, Mail, Rocket } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import {
   DropdownMenu,
@@ -13,9 +13,10 @@ import { useSession, useSignOut } from '@/hooks/use-session'
 import { cn } from '@/lib/utils'
 
 const nav = [
-  { to: '/onboarding', label: 'Get started', icon: Rocket },
+  { to: '/dashboard', label: 'Get started', icon: Rocket },
   { to: '/emails', label: 'Emails', icon: Mail },
   { to: '/api-keys', label: 'API keys', icon: KeyRound },
+  { to: '/usage', label: 'Usage', icon: Gauge },
 ]
 
 // Local development only; production mail goes through SES.

@@ -23,6 +23,6 @@ export function RequireAuth() {
 export function RedirectIfSignedIn() {
   const { data: session, isPending } = useSession()
   if (isPending) return null
-  if (session) return <Navigate to="/onboarding" replace />
+  if (session) return <Navigate to="/dashboard" replace />
   return <Outlet />
 }

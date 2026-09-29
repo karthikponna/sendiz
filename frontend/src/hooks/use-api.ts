@@ -45,6 +45,8 @@ export function useUsage() {
   return useQuery({
     queryKey: ['usage'],
     queryFn: () => api<Usage>('/dashboard/usage'),
+    // Emails sent through the API or SDK also count, so poll to pick those up.
+    refetchInterval: 10_000,
   })
 }
 

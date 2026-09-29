@@ -44,7 +44,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
   async function finishSignIn() {
     await qc.invalidateQueries({ queryKey: sessionKey })
-    navigate('/onboarding', { replace: true })
+    navigate('/dashboard', { replace: true })
   }
 
   // Neon Auth is set to require verification but not to send the code on its own, so the
@@ -89,7 +89,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     setPending('google')
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: `${window.location.origin}/onboarding`,
+      callbackURL: `${window.location.origin}/dashboard`,
     })
     if (error) {
       toast.error(error.message ?? 'Google sign-in failed')

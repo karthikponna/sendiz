@@ -26,7 +26,7 @@ function OAuthCallback({ onDone }: { onDone: () => void }) {
     if (isPending || handled.current) return
     handled.current = true
     if (!session) toast.error('Google sign-in failed, please try again')
-    navigate(session ? '/onboarding' : '/login', { replace: true })
+    navigate(session ? '/dashboard' : '/login', { replace: true })
     onDone()
   }, [isPending, session, navigate, onDone])
 

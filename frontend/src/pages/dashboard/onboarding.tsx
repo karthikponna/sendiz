@@ -174,11 +174,10 @@ export function OnboardingPage() {
                   View it in Emails
                 </Link>
               )}
-              {usage && usage.limit > 0 && (
-                <span className={cn('ml-auto text-xs', limitReached ? 'text-amber-300' : 'text-cf-fg-muted')}>
-                  {usage.used} of {usage.limit} emails used today · resets{' '}
-                  {new Date(usage.resets_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                </span>
+              {limitReached && (
+                <Link to="/usage" className="ml-auto text-xs text-amber-300 underline-offset-4 hover:underline">
+                  Daily limit reached
+                </Link>
               )}
             </div>
           </div>
