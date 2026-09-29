@@ -31,7 +31,8 @@ func main() {
 
 	client := sendiz.NewClient(apiKey)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	// Long enough for the worker's retries (RETRY_AFTER apart) to end in sent or failed.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
 	resp, err := client.Emails.Send(ctx, &sendiz.SendEmailRequest{
@@ -46,6 +47,7 @@ func main() {
 	fmt.Println("queued:", resp.ID)
 
 	// Not part of the dashboard snippet: wait so you can see the email actually go out.
+	lastErr := ""
 	for {
 		email, err := client.Emails.Get(ctx, resp.ID)
 		if err != nil {
@@ -57,6 +59,10 @@ func main() {
 			return
 		case sendiz.StatusFailed:
 			log.Fatalf("failed: %s", email.LastError)
+		}
+		if email.LastError != "" && email.LastError != lastErr {
+			lastErr = email.LastError
+			fmt.Println("retrying after error:", lastErr)
 		}
 		time.Sleep(time.Second)
 	}

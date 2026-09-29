@@ -20,6 +20,8 @@ var defaults = map[string]any{
 	"WORKER_COUNT":     10,
 	"MAX_ATTEMPTS":     3,
 	"RETRY_AFTER":      "30s",
+	"MAILER":           "smtp",
+	"AWS_REGION":       "us-east-2",
 	"SMTP_HOST":        "localhost",
 	"SMTP_PORT":        1025,
 	"SMTP_TIMEOUT":     "15s",

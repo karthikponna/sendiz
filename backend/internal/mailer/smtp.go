@@ -10,12 +10,15 @@ import (
 	"mime/multipart"
 	"mime/quotedprintable"
 	"net"
+	"net/http"
 	"net/mail"
 	"net/smtp"
 	"net/textproto"
 	"strconv"
 	"strings"
 	"time"
+
+	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
 type Config struct {
@@ -35,6 +38,11 @@ type Message struct {
 	Text    string
 }
 
+// Sender delivers one message; both the SMTP Mailer and SES implement it.
+type Sender interface {
+	Send(ctx context.Context, msg Message) error
+}
+
 type Mailer struct {
 	cfg Config
 }
@@ -49,15 +57,24 @@ type permanentError struct{ err error }
 func (e permanentError) Error() string { return e.err.Error() }
 func (e permanentError) Unwrap() error { return e.err }
 
-// IsPermanent reports whether err should not be retried: bad input or an SMTP 5xx reply.
-// Everything else (4xx replies, timeouts, connection errors) is treated as temporary.
+// IsPermanent reports whether err should not be retried: bad input, an SMTP 5xx reply, or
+// an SES 4xx response other than 429. Everything else (SMTP 4xx replies, timeouts,
+// connection errors, SES throttling and 5xx) is treated as temporary.
 func IsPermanent(err error) bool {
 	var pErr permanentError
 	if errors.As(err, &pErr) {
 		return true
 	}
 	var tpErr *textproto.Error
-	return errors.As(err, &tpErr) && tpErr.Code >= 500
+	if errors.As(err, &tpErr) {
+		return tpErr.Code >= 500
+	}
+	var respErr *smithyhttp.ResponseError
+	if errors.As(err, &respErr) {
+		code := respErr.HTTPStatusCode()
+		return code >= 400 && code < 500 && code != http.StatusTooManyRequests
+	}
+	return false
 }
 
 // Send delivers one message. A nil error means the SMTP server replied 250 (accepted),

@@ -36,13 +36,13 @@ type Config struct {
 type Worker struct {
 	db       *gorm.DB
 	rdb      *redis.Client
-	mailer   *mailer.Mailer
+	mailer   mailer.Sender
 	cfg      Config
 	consumer string
 	log      zerolog.Logger
 }
 
-func New(db *gorm.DB, rdb *redis.Client, m *mailer.Mailer, cfg Config) *Worker {
+func New(db *gorm.DB, rdb *redis.Client, m mailer.Sender, cfg Config) *Worker {
 	host, _ := os.Hostname()
 	consumer := fmt.Sprintf("%s-%d", host, os.Getpid())
 	return &Worker{

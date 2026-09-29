@@ -77,6 +77,15 @@ func main() {
 func run(ctx context.Context, stop context.CancelFunc, command string, k *koanf.Koanf, db *gorm.DB, rdb *redis.Client) error {
 	var wg sync.WaitGroup
 	errs := make(chan error, 2)
+	runWorker := command == "worker" || command == "serve"
+
+	var sender mailer.Sender
+	if runWorker {
+		var err error
+		if sender, err = newSender(ctx, k); err != nil {
+			return err
+		}
+	}
 
 	if command == "api" || command == "serve" {
 		wg.Go(func() {
@@ -84,14 +93,8 @@ func run(ctx context.Context, stop context.CancelFunc, command string, k *koanf.
 			stop()
 		})
 	}
-	if command == "worker" || command == "serve" {
-		w := worker.New(db, rdb, mailer.New(mailer.Config{
-			Host:     k.String("SMTP_HOST"),
-			Port:     k.Int("SMTP_PORT"),
-			Username: k.String("SMTP_USERNAME"),
-			Password: k.String("SMTP_PASSWORD"),
-			Timeout:  k.Duration("SMTP_TIMEOUT"),
-		}), worker.Config{
+	if runWorker {
+		w := worker.New(db, rdb, sender, worker.Config{
 			Concurrency: k.Int("WORKER_COUNT"),
 			MaxAttempts: k.Int("MAX_ATTEMPTS"),
 			RetryAfter:  k.Duration("RETRY_AFTER"),
@@ -109,6 +112,32 @@ func run(ctx context.Context, stop context.CancelFunc, command string, k *koanf.
 		all = append(all, err)
 	}
 	return errors.Join(all...)
+}
+
+// newSender picks how the worker delivers mail: MAILER=smtp (Mailpit locally) or
+// MAILER=ses (the SES HTTPS API, for hosts like Railway that block outbound SMTP).
+func newSender(ctx context.Context, k *koanf.Koanf) (mailer.Sender, error) {
+	switch k.String("MAILER") {
+	case "smtp":
+		log.Info().Str("host", k.String("SMTP_HOST")).Int("port", k.Int("SMTP_PORT")).Msg("sending via SMTP")
+		return mailer.New(mailer.Config{
+			Host:     k.String("SMTP_HOST"),
+			Port:     k.Int("SMTP_PORT"),
+			Username: k.String("SMTP_USERNAME"),
+			Password: k.String("SMTP_PASSWORD"),
+			Timeout:  k.Duration("SMTP_TIMEOUT"),
+		}), nil
+	case "ses":
+		log.Info().Str("region", k.String("AWS_REGION")).Msg("sending via the SES API")
+		return mailer.NewSES(ctx, mailer.SESConfig{
+			Region:          k.String("AWS_REGION"),
+			AccessKeyID:     k.String("AWS_ACCESS_KEY_ID"),
+			SecretAccessKey: k.String("AWS_SECRET_ACCESS_KEY"),
+			Timeout:         k.Duration("SMTP_TIMEOUT"),
+		})
+	default:
+		return nil, fmt.Errorf("unknown MAILER %q (want smtp or ses)", k.String("MAILER"))
+	}
 }
 
 func mustConnectDB(ctx context.Context, k *koanf.Koanf) *gorm.DB {
