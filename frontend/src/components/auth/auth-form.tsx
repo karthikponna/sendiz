@@ -245,12 +245,6 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
           {mode === 'signup' ? 'Create account' : 'Log in'}
         </button>
       </form>
-
-      <p className="mt-8 text-center text-xs text-cf-fg-muted">
-        By {mode === 'signup' ? 'signing up' : 'signing in'}, you agree to our{' '}
-        <a href="#" className="underline underline-offset-2 hover:text-cf-fg">Terms</a> and{' '}
-        <a href="#" className="underline underline-offset-2 hover:text-cf-fg">Privacy Policy</a>.
-      </p>
     </>
   )
 }
