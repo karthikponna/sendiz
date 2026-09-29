@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CodeBlock } from '@/components/dashboard/code-block'
 import { CreateApiKeyDialog } from '@/components/dashboard/create-api-key-dialog'
-import { useApiKeys, useSendTestEmail } from '@/hooks/use-api'
+import { useApiKeys, useSendTestEmail, useUsage } from '@/hooks/use-api'
 import { useSession } from '@/hooks/use-session'
 import { cn } from '@/lib/utils'
 
-const API_URL = 'http://localhost:8080'
+const LOCAL_API_URL = 'http://localhost:8080'
+const API_URL = import.meta.env.DEV ? LOCAL_API_URL : 'https://api.sendiz.dev'
+// The SDK defaults to the production API, so only local snippets need WithBaseURL.
+const CLIENT_OPTIONS = import.meta.env.DEV ? `, sendiz.WithBaseURL("${LOCAL_API_URL}")` : ''
 const FROM = 'Sendiz <onboarding@sendiz.dev>'
 const HTML = '<p>Congrats on sending your <strong>first email</strong>!</p>'
 
@@ -25,7 +28,7 @@ import (
 )
 
 func main() {
-	client := sendiz.NewClient("${key}")
+	client := sendiz.NewClient("${key}"${CLIENT_OPTIONS})
 
 	_, err := client.Emails.Send(context.Background(), &sendiz.SendEmailRequest{
 		From:    "${FROM}",
@@ -85,6 +88,7 @@ function Step({ done, title, description, children, last }: {
 export function OnboardingPage() {
   const { data: session } = useSession()
   const { data: keys } = useApiKeys()
+  const { data: usage } = useUsage()
   const sendTest = useSendTestEmail()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newKey, setNewKey] = useState<string | null>(null)
@@ -93,12 +97,15 @@ export function OnboardingPage() {
   const to = session?.user.email ?? 'you@example.com'
   const hasKey = Boolean(newKey) || (keys?.length ?? 0) > 0
   const key = newKey ?? (keys?.[0] ? `${keys[0].prefix}…` : 'sdz_xxxxxxxxx')
+  const limitReached = Boolean(usage && usage.limit > 0 && usage.used >= usage.limit)
 
   async function onSend() {
     try {
       await sendTest.mutateAsync()
       setSent(true)
-      toast.success('Email queued', { description: `On its way to ${to}. Check the Emails tab or Mailpit.` })
+      toast.success('Email queued', {
+        description: `On its way to ${to}. Check the Emails tab${import.meta.env.DEV ? ' or Mailpit' : ''}.`,
+      })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to send email')
     }
@@ -132,7 +139,7 @@ export function OnboardingPage() {
           done={sent}
           last
           title="Send an email"
-          description="Install the SDK, then run the code below to send your first email."
+          description={`Install the SDK, then run the code below. The free plan sends up to 5 emails a day, only to your own address (${to}).`}
         >
           <div className="overflow-hidden rounded-xl border border-cf-border bg-cf-bg-raised">
             <Tabs defaultValue="go">
@@ -153,7 +160,12 @@ export function OnboardingPage() {
               </TabsContent>
             </Tabs>
             <div className="flex items-center gap-3 border-t border-cf-border px-4 py-3">
-              <Button onClick={onSend} disabled={sendTest.isPending} variant="secondary" className="h-8 rounded-full px-3">
+              <Button
+                onClick={onSend}
+                disabled={sendTest.isPending || limitReached}
+                variant="secondary"
+                className="h-8 rounded-full px-3"
+              >
                 {sendTest.isPending ? <Loader2 className="animate-spin" /> : <Send />}
                 Send email
               </Button>
@@ -161,6 +173,12 @@ export function OnboardingPage() {
                 <Link to="/emails" className="text-sm text-cf-fg-muted underline-offset-4 hover:text-cf-fg-strong hover:underline">
                   View it in Emails
                 </Link>
+              )}
+              {usage && usage.limit > 0 && (
+                <span className={cn('ml-auto text-xs', limitReached ? 'text-amber-300' : 'text-cf-fg-muted')}>
+                  {usage.used} of {usage.limit} emails used today · resets{' '}
+                  {new Date(usage.resets_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                </span>
               )}
             </div>
           </div>

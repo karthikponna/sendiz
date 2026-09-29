@@ -25,6 +25,13 @@ export interface CreatedApiKey extends ApiKey {
   key: string
 }
 
+export interface Usage {
+  used: number
+  // 0 means no daily limit
+  limit: number
+  resets_at: string
+}
+
 export interface Page<T> {
   data: T[]
   next_cursor: string | null

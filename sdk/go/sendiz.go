@@ -22,7 +22,7 @@ import (
 
 const (
 	Version        = "0.1.0"
-	DefaultBaseURL = "http://localhost:8080"
+	DefaultBaseURL = "https://api.sendiz.dev"
 )
 
 type Client struct {

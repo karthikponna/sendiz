@@ -1,0 +1,10 @@
+.git
+.cursor
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+frontend
+sdk
+testing
+backend/bin

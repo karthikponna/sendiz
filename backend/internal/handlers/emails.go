@@ -77,6 +77,20 @@ func (h *Handler) GetEmail(c *echo.Context) error {
 // queueEmails saves the emails first (Postgres is the source of truth), then pushes only
 // their IDs to Redis. Workers do the actual sending.
 func (h *Handler) queueEmails(ctx context.Context, userID uuid.UUID, inputs []EmailInput) ([]emailID, error) {
+	if h.OnlySendToSelf {
+		s, err := h.loadSender(ctx, userID)
+		if err != nil {
+			log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to load sender")
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, "Failed to load your account")
+		}
+		if err := h.checkRecipients(s, inputs); err != nil {
+			return nil, err
+		}
+		for i := range inputs {
+			inputs[i].From = h.EmailFrom
+		}
+	}
+
 	emails := make([]model.Email, len(inputs))
 	ids := make([]uuid.UUID, len(inputs))
 	for i, in := range inputs {
@@ -99,7 +113,19 @@ func (h *Handler) queueEmails(ctx context.Context, userID uuid.UUID, inputs []Em
 		}
 	}
 
-	if err := h.DB.WithContext(ctx).Create(&emails).Error; err != nil {
+	// Counting and saving in one transaction means a failed insert never uses up quota.
+	err := h.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if h.DailyLimit > 0 {
+			if err := reserveQuota(tx, userID, len(emails), h.DailyLimit); err != nil {
+				return err
+			}
+		}
+		return tx.Create(&emails).Error
+	})
+	if errors.Is(err, errQuotaExceeded) {
+		return nil, h.quotaExceededError()
+	}
+	if err != nil {
 		log.Error().Err(err).Int("count", len(emails)).Msg("failed to save emails")
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Failed to save emails")
 	}

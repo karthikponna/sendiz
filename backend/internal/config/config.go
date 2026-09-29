@@ -24,6 +24,11 @@ var defaults = map[string]any{
 	"SMTP_PORT":        1025,
 	"SMTP_TIMEOUT":     "15s",
 	"DB_MAX_OPEN_CONN": 20,
+
+	// Free plan: users may only email their own verified address, a few times a day.
+	"EMAIL_FROM":        "Sendiz <onboarding@sendiz.dev>",
+	"DAILY_EMAIL_LIMIT": 5, // 0 means unlimited
+	"ONLY_SEND_TO_SELF": true,
 }
 
 // Load applies defaults, then the nearest .env (searching up from the working

@@ -26,6 +26,21 @@ func (h *Handler) Me(c *echo.Context) error {
 	return c.JSON(http.StatusOK, middleware.CurrentUser(c))
 }
 
+// Usage handles GET /dashboard/usage: how much of today's quota is used. limit is 0 when
+// there is no cap.
+func (h *Handler) Usage(c *echo.Context) error {
+	used, err := h.usedToday(c.Request().Context(), middleware.UserID(c))
+	if err != nil {
+		log.Error().Err(err).Msg("failed to load usage")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load usage")
+	}
+	return c.JSON(http.StatusOK, map[string]any{
+		"used":      used,
+		"limit":     h.DailyLimit,
+		"resets_at": nextReset(),
+	})
+}
+
 // ListEmails pages newest-first with ?cursor=<last id seen>. IDs are UUIDv7, so ordering
 // by id is ordering by creation time and the cursor query stays on the (user_id, id) index.
 func (h *Handler) ListEmails(c *echo.Context) error {
@@ -81,7 +96,7 @@ func (h *Handler) SendTestEmail(c *echo.Context) error {
 	}
 
 	ids, err := h.queueEmails(c.Request().Context(), user.ID, []EmailInput{{
-		From:    "Sendiz <onboarding@sendiz.dev>",
+		From:    h.EmailFrom,
 		To:      user.Email,
 		Subject: "Hello World",
 		HTML:    "<p>Congrats on sending your <strong>first email</strong>!</p>",

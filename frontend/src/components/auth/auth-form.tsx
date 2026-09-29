@@ -22,15 +22,68 @@ function GoogleIcon() {
   )
 }
 
+function isEmailNotVerified(error: { code?: string; message?: string; status?: number }) {
+  return (
+    error.code === 'email_not_confirmed' ||
+    error.code === 'EMAIL_NOT_VERIFIED' ||
+    (error.status === 403 && /verif/i.test(error.message ?? ''))
+  )
+}
+
 export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [pending, setPending] = useState<'email' | 'google' | null>(null)
+  const [pending, setPending] = useState<'email' | 'google' | 'verify' | 'resend' | null>(null)
+  const [step, setStep] = useState<'form' | 'verify'>('form')
+  const [code, setCode] = useState('')
 
   const valid = /\S+@\S+\.\S+/.test(email) && password.length >= MIN_PASSWORD
+
+  async function finishSignIn() {
+    await qc.invalidateQueries({ queryKey: sessionKey })
+    navigate('/onboarding', { replace: true })
+  }
+
+  // Neon Auth is set to require verification but not to send the code on its own, so the
+  // app asks for one whenever it moves to the verify step.
+  async function sendCode() {
+    const { error } = await authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' })
+    if (error) toast.error(error.message ?? 'Could not send the verification code')
+    else toast.success(`We sent a code to ${email}`)
+  }
+
+  async function startVerification() {
+    setStep('verify')
+    setCode('')
+    setPending('resend')
+    await sendCode()
+    setPending(null)
+  }
+
+  async function onVerify(e: React.FormEvent) {
+    e.preventDefault()
+    setPending('verify')
+    const { error } = await authClient.emailOtp.verifyEmail({ email, otp: code })
+    if (error) {
+      toast.error(error.message ?? 'That code is invalid or expired')
+      setPending(null)
+      return
+    }
+    // Verification usually signs the user in; sign in explicitly if it didn't.
+    const { data } = await authClient.getSession()
+    if (!data?.user) {
+      const signIn = await authClient.signIn.email({ email, password })
+      if (signIn.error) {
+        toast.error(signIn.error.message ?? 'Email verified, please log in')
+        setPending(null)
+        return
+      }
+    }
+    await finishSignIn()
+  }
 
   async function onGoogle() {
     setPending('google')
@@ -48,17 +101,85 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     e.preventDefault()
     if (!valid) return
     setPending('email')
-    const { error } =
-      mode === 'signup'
-        ? await authClient.signUp.email({ email, password, name: email.split('@')[0] })
-        : await authClient.signIn.email({ email, password })
+
+    if (mode === 'signup') {
+      const { data, error } = await authClient.signUp.email({ email, password, name: email.split('@')[0] })
+      if (error) {
+        toast.error(error.message ?? 'Something went wrong')
+        setPending(null)
+        return
+      }
+      if (data?.user && !data.user.emailVerified) {
+        await startVerification()
+        return
+      }
+      await finishSignIn()
+      return
+    }
+
+    const { error } = await authClient.signIn.email({ email, password })
     if (error) {
+      if (isEmailNotVerified(error)) {
+        await startVerification()
+        return
+      }
       toast.error(error.message ?? 'Something went wrong')
       setPending(null)
       return
     }
-    await qc.invalidateQueries({ queryKey: sessionKey })
-    navigate('/onboarding', { replace: true })
+    await finishSignIn()
+  }
+
+  if (step === 'verify') {
+    return (
+      <form onSubmit={onVerify} noValidate>
+        <p className="mb-6 text-center text-sm text-cf-fg-muted">
+          Enter the code we sent to <span className="text-cf-fg-strong">{email}</span>. It expires in 15 minutes.
+        </p>
+        <div className="mb-5 flex flex-col gap-2">
+          <label htmlFor="code" className="text-sm text-cf-fg-strong">
+            Verification code
+          </label>
+          <input
+            id="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            autoFocus
+            maxLength={8}
+            placeholder="123456"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+            className={cn(glassInput, 'text-center font-mono text-xl tracking-[0.4em]')}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={code.length < 4 || pending !== null}
+          className={cn(glassButton, 'mt-1 w-full text-sm')}
+        >
+          {pending === 'verify' && <Loader2 className="size-4 animate-spin" />}
+          Verify email
+        </button>
+        <div className="mt-5 flex items-center justify-between text-sm text-cf-fg-muted">
+          <button
+            type="button"
+            onClick={() => setStep('form')}
+            className="transition-colors hover:text-cf-fg-strong"
+          >
+            Use a different email
+          </button>
+          <button
+            type="button"
+            onClick={startVerification}
+            disabled={pending !== null}
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-cf-fg-strong disabled:opacity-50"
+          >
+            {pending === 'resend' && <Loader2 className="size-3.5 animate-spin" />}
+            Resend code
+          </button>
+        </div>
+      </form>
+    )
   }
 
   return (

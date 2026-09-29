@@ -134,7 +134,17 @@ func runAPI(ctx context.Context, k *koanf.Koanf, db *gorm.DB, rdb *redis.Client)
 	if err != nil {
 		return err
 	}
-	h := &handlers.Handler{DB: db, RDB: rdb}
+	h := &handlers.Handler{
+		DB:             db,
+		RDB:            rdb,
+		EmailFrom:      k.String("EMAIL_FROM"),
+		DailyLimit:     k.Int("DAILY_EMAIL_LIMIT"),
+		OnlySendToSelf: k.Bool("ONLY_SEND_TO_SELF"),
+	}
+	log.Info().
+		Int("daily_email_limit", h.DailyLimit).
+		Bool("only_send_to_self", h.OnlySendToSelf).
+		Msg("sending rules")
 	requireAPIKey := middleware.RequireAPIKey(db)
 
 	e := echo.New()
@@ -150,6 +160,7 @@ func runAPI(ctx context.Context, k *koanf.Koanf, db *gorm.DB, rdb *redis.Client)
 	// Dashboard, authenticated with the user's Neon Auth JWT.
 	d := e.Group("/dashboard", middleware.RequireUser(verifier))
 	d.GET("/me", h.Me)
+	d.GET("/usage", h.Usage)
 	d.GET("/emails", h.ListEmails)
 	d.POST("/test-email", h.SendTestEmail)
 	d.GET("/api-keys", h.ListAPIKeys)

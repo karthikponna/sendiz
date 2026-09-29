@@ -18,6 +18,7 @@ const nav = [
   { to: '/api-keys', label: 'API keys', icon: KeyRound },
 ]
 
+// Local development only; production mail goes through SES.
 const MAILPIT_URL = 'http://localhost:8025'
 
 export function DashboardLayout() {
@@ -77,14 +78,16 @@ export function DashboardLayout() {
         </nav>
 
         <div className="mt-auto flex flex-col gap-3 px-2">
-          <a
-            href={MAILPIT_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-xs text-cf-fg-muted transition-colors hover:text-cf-fg-strong"
-          >
-            <ExternalLink className="size-3.5" /> Mailpit inbox
-          </a>
+          {import.meta.env.DEV && (
+            <a
+              href={MAILPIT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-xs text-cf-fg-muted transition-colors hover:text-cf-fg-strong"
+            >
+              <ExternalLink className="size-3.5" /> Mailpit inbox
+            </a>
+          )}
           <NavLink to="/" className="opacity-80 transition-opacity hover:opacity-100">
             <Logo className="[&_span]:text-sm" />
           </NavLink>

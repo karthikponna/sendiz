@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { ApiKey, CreatedApiKey, Email, EmailStatus, Page } from '@/lib/types'
+import type { ApiKey, CreatedApiKey, Email, EmailStatus, Page, Usage } from '@/lib/types'
 
 export function useApiKeys() {
   return useQuery({
@@ -41,10 +41,21 @@ export function useEmails(status?: EmailStatus) {
   })
 }
 
+export function useUsage() {
+  return useQuery({
+    queryKey: ['usage'],
+    queryFn: () => api<Usage>('/dashboard/usage'),
+  })
+}
+
 export function useSendTestEmail() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => api<{ data: { id: string }[] }>('/dashboard/test-email', { method: 'POST' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['emails'] }),
+    // Refresh usage on failure too: a 429 means the count is already at the limit.
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['emails'] })
+      qc.invalidateQueries({ queryKey: ['usage'] })
+    },
   })
 }
