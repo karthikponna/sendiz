@@ -8,7 +8,7 @@
   <a href="https://sendiz.dev">sendiz.dev</a>
 </p>
 
-Sendiz is a minimal email-sending platform, like Resend, built to scale. You send emails with one API call or the Go SDK. Sendiz saves them, queues them, and a pool of workers delivers them in the background, retrying when a mail server has a temporary problem. The dashboard lets you create API keys, send a test email, see every email's status, and track your daily usage.
+Sendiz is a minimal email-sending platform, built to scale. You send emails with one API call or the Go SDK. Sendiz saves them, queues them, and a pool of workers delivers them in the background, retrying when a mail server has a temporary problem. The dashboard lets you create API keys, send a test email, see every email's status, and track your daily usage.
 
 ## Project architecture
 
