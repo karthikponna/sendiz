@@ -1,9 +1,0 @@
-# Cloudflare Pages config for sendiz.dev. Deploy with: bun run deploy
-name = "sendiz"
-pages_build_output_dir = "./dist"
-compatibility_date = "2026-09-01"
-
-# Read by the Pages Functions in ./functions (not secrets).
-[vars]
-API_URL = "https://api.sendiz.dev"
-NEON_AUTH_BASE_URL = "https://ep-little-glade-b5cw2902.neonauth.c-7.us-east-2.aws.neon.tech/neondb/auth"
