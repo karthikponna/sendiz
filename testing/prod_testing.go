@@ -6,7 +6,7 @@
 //
 //	SENDIZ_API_KEY=sdz_... go run prod_testing.go -to you@gmail.com
 //
-// On the free plan "to" must be your own login email, and you can send 5 emails a day.
+// On the free plan "to" must be your own login email, and you can send 10 emails a day.
 package main
 
 import (

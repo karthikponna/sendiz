@@ -2,7 +2,7 @@
 # API key from the dashboard. Pass it as key=sdz_... or export SENDIZ_API_KEY.
 #
 # Targets the local API by default. For production use base=https://api.sendiz.dev; there
-# the free plan only allows sending to your own login email, 5 emails a day, so only
+# the free plan only allows sending to your own login email, 10 emails a day, so only
 # `make single to=<your login email>` works.
 key ?= $(SENDIZ_API_KEY)
 base ?= http://localhost:8080

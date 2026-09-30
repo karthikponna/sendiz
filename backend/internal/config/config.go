@@ -29,7 +29,7 @@ var defaults = map[string]any{
 
 	// Free plan: users may only email their own verified address, a few times a day.
 	"EMAIL_FROM":        "Sendiz <onboarding@sendiz.dev>",
-	"DAILY_EMAIL_LIMIT": 5, // 0 means unlimited
+	"DAILY_EMAIL_LIMIT": 10, // 0 means unlimited
 	"ONLY_SEND_TO_SELF": true,
 }
 

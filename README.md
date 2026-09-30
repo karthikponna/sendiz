@@ -72,7 +72,7 @@ sendiz/
 - **API keys:** create and revoke them from the dashboard.
 - **Dashboard:** a get-started guide, a list of every email and its status, API keys, and daily usage.
 - **Reliable delivery:** background workers, automatic retries, and safe recovery if a worker crashes.
-- **Free plan for testing only:** right now every user can send **5 emails per day**, and only to their own login email. The limit resets every day at midnight UTC.
+- **Free plan for testing only:** right now every user can send **10 emails per day**, and only to their own login email. The limit resets every day at midnight UTC.
 
 ## Prerequisites
 

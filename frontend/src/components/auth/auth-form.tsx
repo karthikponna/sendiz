@@ -155,7 +155,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
         <button
           type="submit"
           disabled={code.length < 4 || pending !== null}
-          className={cn(glassButton, 'mt-1 w-full text-sm')}
+          className={cn(glassButton, 'mx-auto mt-1 h-10 w-40 gap-2 rounded-xl px-4 text-sm')}
         >
           {pending === 'verify' && <Loader2 className="size-4 animate-spin" />}
           Verify email

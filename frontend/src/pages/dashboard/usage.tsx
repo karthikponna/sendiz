@@ -25,7 +25,7 @@ export function UsagePage() {
     <>
       <h1 className="text-[28px] font-medium tracking-[-0.72px] text-cf-fg-strong">Usage</h1>
       <p className="mt-2 text-sm text-cf-fg-muted">
-        The free plan sends up to 5 emails a day, only to your own address
+        The free plan sends up to {usage?.limit || 10} emails a day, only to your own address
         {session?.user.email ? ` (${session.user.email})` : ''}.
       </p>
 

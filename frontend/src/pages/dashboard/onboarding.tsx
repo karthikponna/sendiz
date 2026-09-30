@@ -139,7 +139,7 @@ export function OnboardingPage() {
           done={sent}
           last
           title="Send an email"
-          description={`Install the SDK, then run the code below. The free plan sends up to 5 emails a day, only to your own address (${to}).`}
+          description={`Install the SDK, then run the code below. The free plan sends up to ${usage?.limit || 10} emails a day, only to your own address (${to}).`}
         >
           <div className="overflow-hidden rounded-xl border border-cf-border bg-cf-bg-raised">
             <Tabs defaultValue="go">
