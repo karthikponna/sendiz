@@ -49,7 +49,7 @@ export function LandingPage() {
             </p>
 
             <Link
-              to="/signup"
+              to="/login"
               className="rounded-full border border-cf-cream bg-cf-cream px-6 py-3 font-medium text-cf-ink backdrop-blur-md transition hover:scale-[1.02]"
             >
               Start sending for free

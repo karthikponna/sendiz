@@ -3,7 +3,6 @@ import { RedirectIfSignedIn, RequireAuth } from '@/components/require-auth'
 import { RootLayout } from '@/components/root-layout'
 import { LandingPage } from '@/pages/landing'
 import { LoginPage } from '@/pages/login'
-import { SignupPage } from '@/pages/signup'
 import { DashboardLayout } from '@/pages/dashboard/layout'
 import { OnboardingPage } from '@/pages/dashboard/onboarding'
 import { EmailsPage } from '@/pages/dashboard/emails'
@@ -19,7 +18,6 @@ export const router = createBrowserRouter([
         element: <RedirectIfSignedIn />,
         children: [
           { path: '/login', element: <LoginPage /> },
-          { path: '/signup', element: <SignupPage /> },
         ],
       },
       {
@@ -37,6 +35,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: '/onboarding', element: <Navigate to="/dashboard" replace /> },
+      { path: '/signup', element: <Navigate to="/login" replace /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

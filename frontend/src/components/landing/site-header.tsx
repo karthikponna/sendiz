@@ -53,7 +53,7 @@ export function SiteHeader() {
           </span>
         </Link>
         <Link
-          to={signedIn ? '/dashboard' : '/signup'}
+          to={signedIn ? '/dashboard' : '/login'}
           className={cn(
             ctaClass,
             'pointer-events-auto border-cf-accent bg-cf-accent text-cf-fg-strong transition hover:brightness-110',
