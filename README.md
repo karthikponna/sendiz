@@ -8,7 +8,7 @@
   <a href="https://sendiz.dev">sendiz.dev</a>
 </p>
 
-Sendiz is a minimal email-sending platform, built to scale. You send emails with one API call or the Go SDK. Sendiz saves them, queues them, and a pool of workers delivers them in the background, retrying when a mail server has a temporary problem. The dashboard lets you create API keys, send a test email, see every email's status, and track your daily usage.
+Sendiz is a minimal email-sending platform, built to scale. You send emails with one API call or the Go, Python, or TypeScript SDK. Sendiz saves them, queues them, and a pool of workers delivers them in the background, retrying when a mail server has a temporary problem. The dashboard lets you create API keys, send a test email, see every email's status, and track your daily usage.
 
 ## Project architecture
 
@@ -18,7 +18,7 @@ flowchart TD
     Website -->|sign in| Auth["Neon Auth<br/>Google or email + code"]
     Website -->|dashboard requests| API
 
-    App["Your app<br/>Go SDK or curl + API key"] -->|POST /email| API["Sendiz API<br/>Go on Railway"]
+    App["Your app<br/>SDK or curl + API key"] -->|POST /email| API["Sendiz API<br/>Go on Railway"]
 
     API --> Check["Check the API key<br/>and the free-plan limits"]
     Check -->|allowed| Save["Save each email in Postgres<br/>status: queued"]
@@ -62,13 +62,16 @@ sendiz/
 ├── frontend/                Website and dashboard (React, Vite, Tailwind, shadcn/ui)
 │   ├── src/                 Pages, components, and hooks
 │   └── functions/           Cloudflare Pages proxies to the API and Neon Auth
-├── sdk/go/                  Go SDK: github.com/karthikponna/sendiz/sdk/go
+├── sdk/
+│   ├── go/                  Go SDK: github.com/karthikponna/sendiz/sdk/go
+│   ├── python/              Python SDK: pip install sendiz
+│   └── typescript/          TypeScript SDK: npm install sendiz
 └── testing/                 Scripts to send test emails (single, batch, production)
 ```
 
 ## What we offer
 
-- **Simple API and Go SDK:** send one email or up to 100 at once, then check each one's status.
+- **Simple API and SDKs for Go, Python, and TypeScript:** send one email or up to 100 at once, then check each one's status.
 - **API keys:** create and revoke them from the dashboard.
 - **Dashboard:** a get-started guide, a list of every email and its status, API keys, and daily usage.
 - **Reliable delivery:** background workers, automatic retries, and safe recovery if a worker crashes.

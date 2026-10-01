@@ -2,7 +2,8 @@ import { Fragment } from 'react'
 import { CopyButton } from './copy-button'
 
 // Just enough highlighting for the onboarding snippets: strings and a few keywords.
-const tokenPattern = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(?:package|import|func|if|return|nil)\b)/g
+const tokenPattern =
+  /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(?:package|import|from|func|if|return|nil|const|await|new)\b)/g
 
 function highlight(line: string) {
   return line.split(tokenPattern).map((part, i) => {
